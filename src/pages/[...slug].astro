@@ -1,0 +1,68 @@
+---
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+  const glossaryEntries = await getCollection('glossary');
+  return glossaryEntries.map(entry => ({
+    params: { slug: entry.slug }, props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{entry.data.title} | Glossary</title>
+    <meta name="viewport" content="width=device-width" />
+    <style>
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fa;
+        margin: 0;
+        padding: 40px 20px;
+        color: #333;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 60px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border-radius: 8px;
+      }
+      h1 {
+        font-size: 2.5rem;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 20px;
+        margin-top: 0;
+        font-family: 'Georgia', serif; /* Professional serif font for titles */
+      }
+      .content {
+        font-size: 1.1rem;
+        margin-top: 20px;
+      }
+      a.back-link {
+        display: inline-block;
+        margin-bottom: 20px;
+        text-decoration: none;
+        color: #0066cc;
+        font-weight: 600;
+        font-size: 0.9rem;
+      }
+      a.back-link:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <a href="/" class="back-link">← Back to Glossary</a>
+      <h1>{entry.data.title}</h1>
+      <div class="content">
+        <Content />
+      </div>
+    </div>
+  </body>
+</html>

@@ -3,7 +3,7 @@ title: "CSS"
 description: "Cascading Style Sheets - A style sheet language used for describing the presentation of a document written in HTML."
 ---
 
-**CSS** (Cascading Style Sheets) is the language we use to style an HTML document. CSS describes how HTML elements should be displayed on screen, paper, or in other media.
+**CSS** (Cascading Style Sheets) is the language we use to style an HTML document. CSS describes how HTML elements should be displayed on screen, paper, or in other media test.
 
 ## Key Concepts
 CSS saves a lot of work. It can control the layout of multiple web pages all at once.

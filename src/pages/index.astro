@@ -19,8 +19,11 @@ const grouped = allEntries.reduce((acc, entry) => {
 
 const sortedKeys = Object.keys(grouped).sort();
 
+// --- CRITICAL FIX: Safe Base URL ---
+// זה התיקון שמונע את הקריסה. אם אין כתובת אתר מוגדרת, הוא משתמש בלוקהלוסט
+const baseUrl = Astro.site || 'http://localhost:4321';
+
 // --- SEO: Construct Schema.org JSON-LD ---
-// זה יוצר מפה של כל המונחים עבור גוגל
 const schemaData = {
   "@context": "https://schema.org",
   "@type": "DefinedTermSet",
@@ -29,7 +32,7 @@ const schemaData = {
   "hasDefinedTerm": allEntries.map(entry => ({
     "@type": "DefinedTerm",
     "name": entry.data.title,
-    "url": new URL(`/${entry.slug}`, Astro.site || "http://localhost:4321").href
+    "url": new URL(`/${entry.slug}`, baseUrl).href
   }))
 };
 ---
@@ -40,7 +43,8 @@ const schemaData = {
     <title>The Complete Glossary | A-Z Index</title>
     <meta name="description" content="Browse our comprehensive glossary of terms. Search definitions from A to Z." />
     <meta name="viewport" content="width=device-width" />
-    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    
+    <link rel="canonical" href={new URL(Astro.url.pathname, baseUrl).href} />
     
     <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
 

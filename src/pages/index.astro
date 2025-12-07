@@ -18,105 +18,293 @@ const grouped = allEntries.reduce((acc, entry) => {
 }, {});
 
 const sortedKeys = Object.keys(grouped).sort();
+
+// --- SEO: Construct Schema.org JSON-LD ---
+// זה יוצר מפה של כל המונחים עבור גוגל
+const schemaData = {
+  "@context": "https://schema.org",
+  "@type": "DefinedTermSet",
+  "name": "The Complete Glossary",
+  "description": "A comprehensive dictionary of terms and definitions.",
+  "hasDefinedTerm": allEntries.map(entry => ({
+    "@type": "DefinedTerm",
+    "name": entry.data.title,
+    "url": new URL(`/${entry.slug}`, Astro.site || "http://localhost:4321").href
+  }))
+};
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>The Complete Glossary</title>
+    <title>The Complete Glossary | A-Z Index</title>
+    <meta name="description" content="Browse our comprehensive glossary of terms. Search definitions from A to Z." />
     <meta name="viewport" content="width=device-width" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    
+    <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
+
     <style>
+      :root {
+        --primary-color: #2563eb;
+        --bg-color: #f8fafc;
+        --text-color: #1e293b;
+        --border-color: #e2e8f0;
+        --sidebar-width: 280px;
+      }
+
       body {
-        font-family: 'Segoe UI', sans-serif;
-        max-width: 900px;
+        font-family: system-ui, -apple-system, sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        margin: 0;
+        line-height: 1.6;
+      }
+
+      /* Layout Container */
+      .container {
+        max-width: 1200px;
         margin: 0 auto;
         padding: 40px 20px;
-        background-color: #f8f9fa;
-        color: #333;
+        display: grid;
+        grid-template-columns: var(--sidebar-width) 1fr;
+        gap: 40px;
+        align-items: start; /* Important for sticky sidebar */
       }
-      h1 { text-align: center; font-size: 3rem; margin-bottom: 10px; }
-      p.subtitle { text-align: center; color: #666; margin-bottom: 40px; }
-      
-      /* Navigation Bar */
+
+      /* Header Area */
+      .page-header {
+        grid-column: 1 / -1;
+        text-align: center;
+        margin-bottom: 20px;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 20px;
+      }
+
+      h1 { font-size: 2.5rem; margin: 0 0 10px 0; color: #0f172a; }
+      .subtitle { color: #64748b; font-size: 1.1rem; }
+
+      /* --- Sidebar Styles --- */
+      aside {
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 20px; /* Makes it stick when scrolling */
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+
+      .search-box {
+        position: relative;
+        margin-bottom: 20px;
+      }
+
+      .search-input {
+        width: 100%;
+        padding: 12px 15px;
+        padding-left: 35px; /* Space for icon */
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+      }
+
+      .search-input:focus {
+        outline: none;
+        border-color: var(--primary-color);
+      }
+
+      /* Search Icon (CSS only) */
+      .search-icon {
+        position: absolute;
+        left: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0.5;
+        font-size: 1.2rem;
+      }
+
       .alphabet-nav {
         display: flex;
         flex-wrap: wrap;
-        justify-content: center;
-        gap: 8px;
-        margin-bottom: 50px;
-        padding: 20px;
-        background: white;
-        border-radius: 50px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        gap: 6px;
       }
+
       .alphabet-nav a {
-        width: 30px;
-        height: 30px;
+        width: 32px;
+        height: 32px;
         display: flex;
         align-items: center;
         justify-content: center;
         text-decoration: none;
-        color: #555;
-        font-weight: bold;
-        border-radius: 50%;
-        transition: 0.2s;
+        color: #475569;
+        font-weight: 600;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        transition: all 0.2s;
+        background: #f1f5f9;
       }
-      .alphabet-nav a:hover { background: #0066cc; color: white; transform: scale(1.1); }
 
-      /* Letter Sections */
+      .alphabet-nav a:hover {
+        background: var(--primary-color);
+        color: white;
+      }
+
+      /* --- Main Content Styles --- */
       .letter-section {
         background: white;
-        padding: 30px;
-        margin-bottom: 30px;
+        padding: 25px;
+        margin-bottom: 25px;
         border-radius: 12px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+        border: 1px solid var(--border-color);
+        scroll-margin-top: 20px; /* Fix for anchor jump */
       }
+
       .letter-title {
-        border-bottom: 2px solid #f0f0f0;
-        padding-bottom: 10px;
+        color: var(--primary-color);
+        font-size: 1.8rem;
         margin-top: 0;
-        color: #0066cc;
-        font-size: 2rem;
+        border-bottom: 2px solid #f1f5f9;
+        padding-bottom: 10px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
       }
-      .term-list {
-        list-style: none;
-        padding: 0;
+
+      .term-count {
+        font-size: 0.9rem;
+        color: #94a3b8;
+        font-weight: normal;
+      }
+
+      .term-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
         gap: 15px;
       }
-      .term-list a {
-        text-decoration: none;
-        color: #444;
-        font-size: 1.1rem;
+
+      .term-link {
         display: block;
-        padding: 8px 0;
-        transition: color 0.2s;
+        text-decoration: none;
+        color: #334155;
+        padding: 8px 12px;
+        border-radius: 6px;
+        transition: all 0.2s;
+        border-left: 3px solid transparent;
       }
-      .term-list a:hover { color: #0066cc; padding-left: 5px; }
+
+      .term-link:hover {
+        background: #f8fafc;
+        color: var(--primary-color);
+        border-left-color: var(--primary-color);
+        transform: translateX(5px);
+      }
+
+      .hidden { display: none !important; }
+      .no-results { text-align: center; padding: 40px; color: #64748b; display: none; }
+
+      /* Mobile Responsive */
+      @media (max-width: 768px) {
+        .container {
+          grid-template-columns: 1fr;
+        }
+        aside {
+          position: static;
+          max-height: none;
+        }
+        .page-header h1 { font-size: 2rem; }
+      }
     </style>
   </head>
   <body>
-    <h1>Glossary</h1>
-    <p class="subtitle">A comprehensive list of terms from A to Z</p>
+    
+    <div class="container">
+      <header class="page-header">
+        <h1>Glossary of Terms</h1>
+        <p class="subtitle">Your comprehensive dictionary from A to Z</p>
+      </header>
 
-    <div class="alphabet-nav">
-      {sortedKeys.map((letter) => (
-        <a href={`#letter-${letter}`}>{letter}</a>
-      ))}
+      <aside>
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input type="text" id="searchInput" class="search-input" placeholder="Search a term..." aria-label="Search terms">
+        </div>
+        
+        <nav class="alphabet-nav" aria-label="Alphabet navigation">
+          {sortedKeys.map((letter) => (
+            <a href={`#letter-${letter}`}>{letter}</a>
+          ))}
+        </nav>
+      </aside>
+
+      <main id="glossaryContent">
+        <div id="noResults" class="no-results">No terms found matching your search.</div>
+
+        {sortedKeys.map((letter) => (
+          <section id={`letter-${letter}`} class="letter-section">
+            <h2 class="letter-title">
+              {letter}
+              <span class="term-count">{grouped[letter].length} terms</span>
+            </h2>
+            <div class="term-grid">
+              {grouped[letter].map((entry) => (
+                <a href={`/${entry.slug}`} class="term-link" data-term={entry.data.title.toLowerCase()}>
+                  {entry.data.title}
+                </a>
+              ))}
+            </div>
+          </section>
+        ))}
+      </main>
     </div>
 
-    {sortedKeys.map((letter) => (
-      <div id={`letter-${letter}`} class="letter-section">
-        <h2 class="letter-title">{letter}</h2>
-        <ul class="term-list">
-          {grouped[letter].map((entry) => (
-            <li>
-              <a href={`/${entry.slug}`}>{entry.data.title}</a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    ))}
+    <script>
+      const searchInput = document.getElementById('searchInput');
+      const letterSections = document.querySelectorAll('.letter-section');
+      const termLinks = document.querySelectorAll('.term-link');
+      const noResultsMsg = document.getElementById('noResults');
+
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase();
+        let hasGlobalResults = false;
+
+        // 1. Loop through all letter sections
+        letterSections.forEach(section => {
+          let hasVisibleTerms = false;
+          const termsInSection = section.querySelectorAll('.term-link');
+
+          // 2. Loop through terms in this section
+          termsInSection.forEach(term => {
+            const title = term.getAttribute('data-term');
+            if (title.includes(query)) {
+              term.classList.remove('hidden');
+              hasVisibleTerms = true;
+              hasGlobalResults = true;
+            } else {
+              term.classList.add('hidden');
+            }
+          });
+
+          // 3. Hide entire section if no terms match
+          if (hasVisibleTerms) {
+            section.classList.remove('hidden');
+          } else {
+            section.classList.add('hidden');
+          }
+        });
+
+        // 4. Show/Hide "No Results" message
+        if (!hasGlobalResults) {
+          noResultsMsg.style.display = 'block';
+        } else {
+          noResultsMsg.style.display = 'none';
+        }
+      });
+    </script>
+
   </body>
 </html>

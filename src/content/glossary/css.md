@@ -6,7 +6,7 @@ description: "Cascading Style Sheets - A style sheet language used for describin
 **CSS** (Cascading Style Sheets) is the language we use to style an HTML document. CSS describes how HTML elements should be displayed on screen, paper, or in other media test.
 
 ## Key Concepts
-CSS saves a lot of work. It can control the layout of multiple web pages all at once.
+CSS saves a lot of work. It can control the layout of multiple web pages all at once test.
 
 * **Selectors:** Patterns used to select the element(s) you want to style.
 * **Properties:** The specific aspect of the element you want to change (e.g., color, font-size).

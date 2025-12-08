@@ -4,19 +4,19 @@ description: "Hypertext Transfer Protocol - An application layer protocol for tr
 date: "2023-10-27"
 ---
 
-*HTTP* (Hypertext Transfer Protocol) is the foundation of data communication for the World Wide Web. It functions as a request-response protocol in the client-server computing model. A web browser, for example, may be the client and an application running on a computer hosting a website may be the server.
+**HTTP** (Hypertext Transfer Protocol) is the foundation of data communication for the World Wide Web. It functions as a request-response protocol in the client-server computing model. A web browser, for example, may be the client and an application running on a computer hosting a website may be the server.
 
 ## Request Methods (Verbs)
-•⁠  ⁠*GET:* Requests data from a specified resource (e.g., loading a webpage).
-•⁠  ⁠*POST:* Submits data to be processed to a specified resource (e.g., submitting a form).
-•⁠  ⁠*PUT:* Updates a specified resource.
-•⁠  ⁠*DELETE:* Deletes the specified resource.
+*  ⁠*GET:* Requests data from a specified resource (e.g., loading a webpage).
+*  ⁠*POST:* Submits data to be processed to a specified resource (e.g., submitting a form).
+*  ⁠*PUT:* Updates a specified resource.
+*⁠  ⁠*DELETE:* Deletes the specified resource.
 
 ## Status Codes
-•⁠  ⁠*200 OK:* Success.
-•⁠  ⁠*301 Moved Permanently:* The page has moved to a new URL.
-•⁠  ⁠*404 Not Found:* The server cannot find the requested resource.
-•⁠  ⁠*500 Internal Server Error:* The server crashed or encountered an error.
+*⁠  ⁠*200 OK:* Success.
+*⁠  ⁠*301 Moved Permanently:* The page has moved to a new URL.
+*⁠  ⁠*404 Not Found:* The server cannot find the requested resource.
+*⁠  ⁠*500 Internal Server Error:* The server crashed or encountered an error.
 
 ## Frequently Asked Questions
 

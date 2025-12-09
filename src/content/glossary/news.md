@@ -1,7 +1,7 @@
 ---
 title: "news"
 description: "Hypertext Transfer Protocol - An application layer protocol for transmitting hypermedia documents, such as HTML."
-date: "2023-10-27"
+date: "2025-10-27"
 ---
 
 *HTTP* (Hypertext Transfer Protocol) is the foundation of data communication for the World Wide Web. It functions as a request-response protocol in the client-server computing model. A web browser, for example, may be the client and an application running on a computer hosting a website may be the server.

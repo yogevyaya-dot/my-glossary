@@ -1,5 +1,11 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 
-// https://astro.build/config
-export default defineConfig({});
+import sitemap from '@astrojs/sitemap';
+
+export default defineConfig({
+  // 👇 הוסף את השורה הזו (תחליף בכתובת האמיתית שלך)
+  site: 'https://my-glossary.pages.dev', 
+
+  integrations: [sitemap()],
+});

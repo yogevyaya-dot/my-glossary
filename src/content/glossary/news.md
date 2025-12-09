@@ -1,5 +1,5 @@
 ---
-title: "HTTP"
+title: "news"
 description: "Hypertext Transfer Protocol - An application layer protocol for transmitting hypermedia documents, such as HTML."
 date: "2023-10-27"
 ---

@@ -1,6 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
 
+// --- PERFORMANCE: Local Font Import ---
+import '@fontsource/outfit/300.css';
+import '@fontsource/outfit/400.css';
+import '@fontsource/outfit/500.css';
+import '@fontsource/outfit/700.css';
+
 export async function getStaticPaths() {
   const glossaryEntries = await getCollection('glossary');
   return glossaryEntries.map(entry => ({
@@ -13,26 +19,48 @@ const { Content } = await entry.render();
 
 // For SEO / Metadata
 const currentUrl = Astro.url.href;
+const baseUrl = Astro.site || 'http://localhost:4321';
+
+// --- SEO: Dynamic Description ---
+// אם יש לך שדה description ב-frontmatter של המונח, נשתמש בו. אחרת, ניצור ברירת מחדל.
+const metaDescription = entry.data.description || `Definition and explanation of the term ${entry.data.title} in our modern glossary.`;
+
+// --- SEO: Structured Data for Single Term ---
+const schemaData = {
+  "@context": "https://schema.org",
+  "@type": "DefinedTerm",
+  "name": entry.data.title,
+  "description": metaDescription,
+  "url": currentUrl,
+  "inDefinedTermSet": {
+    "@type": "DefinedTermSet",
+    "name": "The Modern Glossary",
+    "url": baseUrl
+  }
+};
 ---
 
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <title>{entry.data.title} | Modern Glossary</title>
-    <meta name="viewport" content="width=device-width" />
+    <meta name="description" content={metaDescription} />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="canonical" href={currentUrl} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
 
     <style>
       :root {
-        --primary: #6366f1;
-        --primary-dark: #4f46e5;
-        --secondary: #8b5cf6;
+        /* --- ACCESSIBILITY: High Contrast Colors (Matching Index) --- */
+        --primary: #4f46e5;       /* Indigo 600 */
+        --primary-dark: #4338ca;  /* Indigo 700 */
+        --secondary: #7c3aed;     /* Violet 600 */
+        
         --bg-color: #f8fafc;
-        --text-main: #1e293b;
-        --text-muted: #64748b;
+        --text-main: #0f172a;     /* Slate 900 (High contrast) */
+        --text-muted: #475569;    /* Slate 600 (Accessible) */
         --surface: #ffffff;
         --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
       }
@@ -42,7 +70,7 @@ const currentUrl = Astro.url.href;
         background-color: var(--bg-color);
         margin: 0;
         color: var(--text-main);
-        line-height: 1.8; /* Better readability */
+        line-height: 1.8;
       }
 
       /* Background Decoration */
@@ -52,7 +80,7 @@ const currentUrl = Astro.url.href;
         right: -10%;
         width: 600px;
         height: 600px;
-        background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, rgba(255,255,255,0) 70%);
+        background: radial-gradient(circle, rgba(99, 102, 241, 0.05) 0%, rgba(255,255,255,0) 70%);
         z-index: -1;
         pointer-events: none;
       }
@@ -80,7 +108,7 @@ const currentUrl = Astro.url.href;
         gap: 8px;
         text-decoration: none;
         color: var(--text-muted);
-        font-weight: 500;
+        font-weight: 600; /* Increased weight for A11y */
         padding: 8px 16px;
         border-radius: 50px;
         background: white;
@@ -88,10 +116,12 @@ const currentUrl = Astro.url.href;
         transition: all 0.2s;
       }
 
-      .back-btn:hover {
+      .back-btn:hover, .back-btn:focus {
         color: var(--primary);
         transform: translateX(-3px);
         box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        outline: 2px solid var(--primary);
+        outline-offset: 2px;
       }
 
       /* --- Main Card --- */
@@ -136,7 +166,7 @@ const currentUrl = Astro.url.href;
         margin: 0;
         line-height: 1.1;
         font-weight: 700;
-        /* Gradient Text */
+        color: var(--text-main); /* Ensure contrast without gradient fallback issues */
         background: linear-gradient(135deg, var(--text-main) 30%, var(--primary));
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
@@ -157,16 +187,18 @@ const currentUrl = Astro.url.href;
         justify-content: center;
       }
 
-      .copy-btn:hover {
+      .copy-btn:hover, .copy-btn:focus {
         background: var(--primary);
         color: white;
+        outline: 2px solid var(--primary-dark);
+        outline-offset: 2px;
       }
 
       .tooltip {
         position: absolute;
         top: 20px;
         right: 20px;
-        background: #1e293b;
+        background: #0f172a;
         color: white;
         padding: 6px 12px;
         border-radius: 6px;
@@ -174,16 +206,17 @@ const currentUrl = Astro.url.href;
         opacity: 0;
         transition: opacity 0.3s;
         pointer-events: none;
+        z-index: 10;
       }
 
       .tooltip.visible { opacity: 1; }
 
       /* --- Prose / Content Styling --- 
-         This styles the markdown content specifically 
+         Accessibility adjusted colors
       */
       .prose {
         font-size: 1.15rem;
-        color: #334155;
+        color: #334155; /* Slate 700 for better readability than 600 */
       }
 
       .prose :global(p) { margin-bottom: 1.5em; }
@@ -193,13 +226,14 @@ const currentUrl = Astro.url.href;
         color: var(--text-main);
         margin-top: 2em;
         margin-bottom: 0.8em;
-        font-weight: 600;
+        font-weight: 700;
       }
 
       .prose :global(h3) {
         font-size: 1.4rem;
         margin-top: 1.5em;
         color: var(--primary-dark);
+        font-weight: 600;
       }
 
       .prose :global(ul) {
@@ -231,7 +265,7 @@ const currentUrl = Astro.url.href;
       }
 
       .prose :global(pre) {
-        background: #1e293b;
+        background: #0f172a;
         padding: 1.5em;
         border-radius: 12px;
         overflow-x: auto;
@@ -268,19 +302,19 @@ const currentUrl = Astro.url.href;
 
     <div class="layout">
       <nav class="nav-bar">
-        <a href="/" class="back-btn">
+        <a href="/" class="back-btn" aria-label="Return to main glossary">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           Back to Glossary
         </a>
       </nav>
 
       <article class="term-card">
-        <div id="copyTooltip" class="tooltip">Link Copied!</div>
+        <div id="copyTooltip" class="tooltip" role="status">Link Copied!</div>
         
         <header>
           <h1>{entry.data.title}</h1>
           
-          <button class="copy-btn" id="copyBtn" aria-label="Copy link to term">
+          <button class="copy-btn" id="copyBtn" aria-label="Copy link to this definition">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
           </button>
         </header>
@@ -295,22 +329,24 @@ const currentUrl = Astro.url.href;
       const copyBtn = document.getElementById('copyBtn');
       const tooltip = document.getElementById('copyTooltip');
 
-      copyBtn.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText(currentUrl);
-          
-          // Show tooltip
-          tooltip.classList.add('visible');
-          
-          // Hide after 2 seconds
-          setTimeout(() => {
-            tooltip.classList.remove('visible');
-          }, 2000);
-          
-        } catch (err) {
-          console.error('Failed to copy text: ', err);
-        }
-      });
+      if (copyBtn) {
+        copyBtn.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(currentUrl);
+            
+            // Show tooltip
+            tooltip.classList.add('visible');
+            
+            // Hide after 2 seconds
+            setTimeout(() => {
+              tooltip.classList.remove('visible');
+            }, 2000);
+            
+          } catch (err) {
+            console.error('Failed to copy text: ', err);
+          }
+        });
+      }
     </script>
   </body>
 </html>

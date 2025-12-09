@@ -18,16 +18,13 @@ const grouped = allEntries.reduce((acc, entry) => {
 }, {});
 
 const sortedKeys = Object.keys(grouped).sort();
-
-// --- CRITICAL FIX: Safe Base URL ---
-// זה התיקון שמונע את הקריסה. אם אין כתובת אתר מוגדרת, הוא משתמש בלוקהלוסט
 const baseUrl = Astro.site || 'http://localhost:4321';
 
-// --- SEO: Construct Schema.org JSON-LD ---
+// --- SEO Data ---
 const schemaData = {
   "@context": "https://schema.org",
   "@type": "DefinedTermSet",
-  "name": "The Complete Glossary",
+  "name": "The Modern Glossary",
   "description": "A comprehensive dictionary of terms and definitions.",
   "hasDefinedTerm": allEntries.map(entry => ({
     "@type": "DefinedTerm",
@@ -37,227 +34,360 @@ const schemaData = {
 };
 ---
 
-<html lang="en">
+<html lang="en" class="scroll-smooth">
   <head>
     <meta charset="utf-8" />
-    <title>The Complete Glossary | A-Z Index</title>
-    <meta name="description" content="Browse our comprehensive glossary of terms. Search definitions from A to Z." />
+    <title>Glossary | Modern Index</title>
+    <meta name="description" content="Browse our comprehensive glossary of terms." />
     <meta name="viewport" content="width=device-width" />
-    
     <link rel="canonical" href={new URL(Astro.url.pathname, baseUrl).href} />
     
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;700&display=swap" rel="stylesheet">
+
     <script type="application/ld+json" set:html={JSON.stringify(schemaData)} />
 
     <style>
       :root {
-        --primary-color: #2563eb;
-        --bg-color: #f8fafc;
-        --text-color: #1e293b;
-        --border-color: #e2e8f0;
-        --sidebar-width: 280px;
+        /* Modern Palette */
+        --primary: #6366f1;       /* Indigo 500 */
+        --primary-dark: #4f46e5;  /* Indigo 600 */
+        --secondary: #8b5cf6;     /* Violet 500 */
+        --bg-color: #f8fafc;      /* Slate 50 */
+        --surface: #ffffff;
+        --text-main: #1e293b;     /* Slate 800 */
+        --text-muted: #64748b;    /* Slate 500 */
+        --border: #e2e8f0;
+        
+        --sidebar-width: 300px;
+        --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+        --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
       }
 
       body {
-        font-family: system-ui, -apple-system, sans-serif;
+        font-family: 'Outfit', sans-serif;
         background-color: var(--bg-color);
-        color: var(--text-color);
+        color: var(--text-main);
         margin: 0;
         line-height: 1.6;
       }
 
-      /* Layout Container */
+      /* Background Decoration */
+      .bg-blob {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        z-index: -1;
+        background: 
+          radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.08), transparent 25%),
+          radial-gradient(circle at 85% 30%, rgba(139, 92, 246, 0.08), transparent 25%);
+      }
+
       .container {
-        max-width: 1200px;
+        max-width: 1280px;
         margin: 0 auto;
         padding: 40px 20px;
         display: grid;
         grid-template-columns: var(--sidebar-width) 1fr;
-        gap: 40px;
-        align-items: start; /* Important for sticky sidebar */
+        gap: 60px;
+        align-items: start;
       }
 
-      /* Header Area */
+      /* --- Header --- */
       .page-header {
         grid-column: 1 / -1;
         text-align: center;
-        margin-bottom: 20px;
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 20px;
+        margin-bottom: 40px;
+        padding: 40px 0;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: 24px;
+        color: white;
+        box-shadow: var(--shadow-lg);
       }
 
-      h1 { font-size: 2.5rem; margin: 0 0 10px 0; color: #0f172a; }
-      .subtitle { color: #64748b; font-size: 1.1rem; }
+      h1 { 
+        font-size: 3rem; 
+        margin: 0; 
+        letter-spacing: -0.02em;
+        font-weight: 700;
+      }
+      
+      .subtitle { 
+        color: rgba(255,255,255, 0.9); 
+        font-size: 1.2rem; 
+        margin-top: 10px;
+        font-weight: 300;
+      }
 
-      /* --- Sidebar Styles --- */
+      /* --- Sidebar --- */
       aside {
-        background: white;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        background: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(12px);
+        padding: 24px;
+        border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.5);
+        box-shadow: var(--shadow-md);
         position: sticky;
-        top: 20px; /* Makes it stick when scrolling */
-        max-height: 90vh;
+        top: 30px;
+        max-height: calc(100vh - 60px);
         overflow-y: auto;
+        /* Custom Scrollbar for sidebar */
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary) transparent;
       }
 
-      .search-box {
+      /* Search */
+      .search-wrapper {
         position: relative;
-        margin-bottom: 20px;
+        margin-bottom: 25px;
+      }
+
+      .search-icon {
+        position: absolute;
+        left: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--text-muted);
+        pointer-events: none;
       }
 
       .search-input {
         width: 100%;
-        padding: 12px 15px;
-        padding-left: 35px; /* Space for icon */
-        border: 2px solid var(--border-color);
-        border-radius: 8px;
+        padding: 14px 14px 14px 45px;
+        border: 2px solid transparent;
+        background: white;
+        border-radius: 12px;
         font-size: 1rem;
-        transition: border-color 0.2s;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s ease;
         box-sizing: border-box;
+        font-family: inherit;
       }
 
       .search-input:focus {
         outline: none;
-        border-color: var(--primary-color);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
       }
 
-      /* Search Icon (CSS only) */
-      .search-icon {
+      .clear-btn {
         position: absolute;
-        left: 10px;
+        right: 12px;
         top: 50%;
         transform: translateY(-50%);
-        opacity: 0.5;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: var(--text-muted);
         font-size: 1.2rem;
+        display: none; /* Hidden by default */
       }
 
+      .clear-btn:hover { color: var(--primary); }
+
+      /* Alphabet Nav */
       .alphabet-nav {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 6px;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
       }
 
       .alphabet-nav a {
-        width: 32px;
-        height: 32px;
+        aspect-ratio: 1;
         display: flex;
         align-items: center;
         justify-content: center;
         text-decoration: none;
-        color: #475569;
+        color: var(--text-muted);
         font-weight: 600;
-        border-radius: 6px;
-        font-size: 0.9rem;
+        border-radius: 8px;
         transition: all 0.2s;
-        background: #f1f5f9;
+        font-size: 0.9rem;
       }
 
       .alphabet-nav a:hover {
-        background: var(--primary-color);
+        background: #e0e7ff;
+        color: var(--primary);
+      }
+
+      .alphabet-nav a.active-letter {
+        background: var(--primary);
         color: white;
+        box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.4);
       }
 
-      /* --- Main Content Styles --- */
+      /* --- Main Content --- */
       .letter-section {
-        background: white;
-        padding: 25px;
-        margin-bottom: 25px;
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-        scroll-margin-top: 20px; /* Fix for anchor jump */
+        margin-bottom: 50px;
+        scroll-margin-top: 40px;
       }
 
-      .letter-title {
-        color: var(--primary-color);
-        font-size: 1.8rem;
-        margin-top: 0;
-        border-bottom: 2px solid #f1f5f9;
-        padding-bottom: 10px;
-        margin-bottom: 20px;
+      .letter-header {
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        gap: 15px;
+        margin-bottom: 25px;
+        border-bottom: 2px solid #e2e8f0;
+        padding-bottom: 10px;
+      }
+
+      .letter-badge {
+        background: var(--primary);
+        color: white;
+        width: 50px;
+        height: 50px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.8rem;
+        font-weight: 700;
+        box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
       }
 
       .term-count {
-        font-size: 0.9rem;
-        color: #94a3b8;
-        font-weight: normal;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        background: #f1f5f9;
+        padding: 4px 12px;
+        border-radius: 20px;
       }
 
+      /* Cards Grid */
       .term-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 15px;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 20px;
       }
 
-      .term-link {
-        display: block;
+      .term-card {
+        background: var(--surface);
+        padding: 20px;
+        border-radius: 16px;
         text-decoration: none;
-        color: #334155;
-        padding: 8px 12px;
-        border-radius: 6px;
-        transition: all 0.2s;
-        border-left: 3px solid transparent;
+        color: var(--text-main);
+        border: 1px solid rgba(0,0,0,0.05);
+        box-shadow: var(--shadow-sm);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
       }
 
-      .term-link:hover {
-        background: #f8fafc;
-        color: var(--primary-color);
-        border-left-color: var(--primary-color);
-        transform: translateX(5px);
+      .term-card::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: var(--primary);
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .term-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .term-card:hover::before {
+        opacity: 1;
+      }
+
+      .term-title {
+        font-weight: 600;
+        font-size: 1.1rem;
+        margin: 0;
       }
 
       .hidden { display: none !important; }
-      .no-results { text-align: center; padding: 40px; color: #64748b; display: none; }
+      
+      .no-results { 
+        text-align: center; 
+        padding: 60px; 
+        background: white;
+        border-radius: 16px;
+        box-shadow: var(--shadow-sm);
+        display: none; 
+      }
+      
+      .no-results p { font-size: 1.2rem; color: var(--text-muted); margin: 10px 0 0 0; }
+      .no-results-icon { font-size: 3rem; display: block; margin-bottom: 10px; opacity: 0.5; }
 
-      /* Mobile Responsive */
+      /* Mobile */
       @media (max-width: 768px) {
-        .container {
-          grid-template-columns: 1fr;
+        .container { 
+          grid-template-columns: 1fr; 
+          gap: 30px;
+          padding-top: 20px;
         }
+        
+        .page-header {
+          border-radius: 0 0 24px 24px;
+          margin: -20px -20px 30px -20px;
+        }
+
+        h1 { font-size: 2.2rem; }
+
         aside {
           position: static;
           max-height: none;
         }
-        .page-header h1 { font-size: 2rem; }
+        
+        .alphabet-nav {
+          grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+        }
       }
     </style>
   </head>
   <body>
+
+    <div class="bg-blob"></div>
     
     <div class="container">
       <header class="page-header">
-        <h1>Glossary of Terms</h1>
-        <p class="subtitle">Your comprehensive dictionary from A to Z</p>
+        <h1>Glossary</h1>
+        <p class="subtitle">The definitive guide to our terminology</p>
       </header>
 
       <aside>
-        <div class="search-box">
-          <span class="search-icon">🔍</span>
-          <input type="text" id="searchInput" class="search-input" placeholder="Search a term..." aria-label="Search terms">
+        <div class="search-wrapper">
+          <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="searchInput" class="search-input" placeholder="Find a definition..." aria-label="Search terms">
+          <button id="clearBtn" class="clear-btn" aria-label="Clear search">×</button>
         </div>
         
         <nav class="alphabet-nav" aria-label="Alphabet navigation">
           {sortedKeys.map((letter) => (
-            <a href={`#letter-${letter}`}>{letter}</a>
+            <a href={`#letter-${letter}`} class="nav-letter" data-letter={letter}>{letter}</a>
           ))}
         </nav>
       </aside>
 
       <main id="glossaryContent">
-        <div id="noResults" class="no-results">No terms found matching your search.</div>
+        <div id="noResults" class="no-results">
+            <span class="no-results-icon">🤷‍♂️</span>
+            <p>No results found.</p>
+        </div>
 
         {sortedKeys.map((letter) => (
           <section id={`letter-${letter}`} class="letter-section">
-            <h2 class="letter-title">
-              {letter}
-              <span class="term-count">{grouped[letter].length} terms</span>
-            </h2>
+            <div class="letter-header">
+                <div class="letter-badge">{letter}</div>
+                <span class="term-count">{grouped[letter].length} terms</span>
+            </div>
+            
             <div class="term-grid">
               {grouped[letter].map((entry) => (
-                <a href={`/${entry.slug}`} class="term-link" data-term={entry.data.title.toLowerCase()}>
-                  {entry.data.title}
+                <a href={`/${entry.slug}`} class="term-card" data-term={entry.data.title.toLowerCase()}>
+                  <h3 class="term-title">{entry.data.title}</h3>
                 </a>
               ))}
             </div>
@@ -267,33 +397,36 @@ const schemaData = {
     </div>
 
     <script>
+      // Elements
       const searchInput = document.getElementById('searchInput');
+      const clearBtn = document.getElementById('clearBtn');
       const letterSections = document.querySelectorAll('.letter-section');
-      const termLinks = document.querySelectorAll('.term-link');
       const noResultsMsg = document.getElementById('noResults');
+      const navLinks = document.querySelectorAll('.nav-letter');
 
-      searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
+      // --- 1. Search Logic ---
+      function performSearch() {
+        const query = searchInput.value.toLowerCase();
         let hasGlobalResults = false;
 
-        // 1. Loop through all letter sections
+        // Toggle clear button
+        clearBtn.style.display = query.length > 0 ? 'block' : 'none';
+
         letterSections.forEach(section => {
           let hasVisibleTerms = false;
-          const termsInSection = section.querySelectorAll('.term-link');
+          const termsInThisSection = section.querySelectorAll('.term-card');
 
-          // 2. Loop through terms in this section
-          termsInSection.forEach(term => {
-            const title = term.getAttribute('data-term');
+          termsInThisSection.forEach(card => {
+            const title = card.getAttribute('data-term');
             if (title.includes(query)) {
-              term.classList.remove('hidden');
+              card.classList.remove('hidden');
               hasVisibleTerms = true;
               hasGlobalResults = true;
             } else {
-              term.classList.add('hidden');
+              card.classList.add('hidden');
             }
           });
 
-          // 3. Hide entire section if no terms match
           if (hasVisibleTerms) {
             section.classList.remove('hidden');
           } else {
@@ -301,14 +434,39 @@ const schemaData = {
           }
         });
 
-        // 4. Show/Hide "No Results" message
-        if (!hasGlobalResults) {
-          noResultsMsg.style.display = 'block';
-        } else {
-          noResultsMsg.style.display = 'none';
-        }
-      });
-    </script>
+        noResultsMsg.style.display = hasGlobalResults ? 'none' : 'block';
+      }
 
+      searchInput.addEventListener('input', performSearch);
+      
+      clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        performSearch();
+        searchInput.focus();
+      });
+
+      // --- 2. Active Letter Highlighter (Intersection Observer) ---
+      const observerOptions = {
+        root: null,
+        rootMargin: '-20% 0px -60% 0px', // Trigger when section is near top
+        threshold: 0
+      };
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            // Get the letter from ID (letter-A -> A)
+            const id = entry.target.id.replace('letter-', '');
+            
+            // Update Nav
+            navLinks.forEach(link => {
+                link.classList.toggle('active-letter', link.dataset.letter === id);
+            });
+          }
+        });
+      }, observerOptions);
+
+      letterSections.forEach(section => observer.observe(section));
+    </script>
   </body>
 </html>
